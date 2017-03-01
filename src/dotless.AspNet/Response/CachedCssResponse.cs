@@ -24,10 +24,20 @@
         public override void WriteHeaders()
         {
             var response = Http.Context.Response;
+			response.Headers.Add("lessCache", "true");
+
+			if (_httpExpiryInMinutes < 1)
+			{
+				response.Cache.SetCacheability(HttpCacheability.NoCache);
+				response.Cache.SetMaxAge(new TimeSpan(0));
+				return;
+			}
 
             response.Cache.SetCacheability(HttpCacheability.Public);
+			var expire = DateTime.UtcNow.AddMinutes(_httpExpiryInMinutes);
+			response.Cache.SetExpires(expire);
+			response.Cache.SetMaxAge((expire - DateTime.Now));
 
-            response.Cache.SetExpires(_clock.GetUtcNow().AddMinutes(_httpExpiryInMinutes));
             response.Cache.SetETagFromFileDependencies();
             response.Cache.SetLastModifiedFromFileDependencies();
 
