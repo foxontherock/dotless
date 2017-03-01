@@ -24,6 +24,14 @@ namespace dotless.Core.Response
 
         public virtual void WriteHeaders()
         {
+			var response = Http.Context.Response;
+			if (response.Headers.Get("lessCache") == null)
+			{
+				response.Headers.Add("lessCache", "false");
+				response.Cache.SetCacheability(HttpCacheability.NoCache);
+				response.Cache.SetMaxAge(new System.TimeSpan(0));
+			}
+            
             if (IsCompressionHandledByResponse)
             {
                 HandleCompression();
